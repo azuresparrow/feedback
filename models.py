@@ -64,6 +64,7 @@ class User(db.Model):
 
 
 class Feedback(db.Model):
+    """Feedback left by users"""
     __tablename__ = "feedback"
 
     id = db.Column(db.Integer,

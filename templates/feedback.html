@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback{% endblock %}
+
+{% block content %}
+    <h1>Feedback:</h1>
+    <form id="feedback-form" method="POST">
+
+        {% include 'form.html' %}
+  
+        <button class="btn btn-primary" type="submit">Save</button>
+    </form>
+{% endblock %}

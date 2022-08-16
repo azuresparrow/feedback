@@ -1,8 +1,8 @@
 """Blogly application."""
 
 from flask import Flask, render_template, redirect, flash, session, abort
-from forms import RegisterUserForm, LoginUserForm
-from models import db, connect_db, User
+from forms import FeedbackForm, RegisterUserForm, LoginUserForm
+from models import Feedback, db, connect_db, User
 
 app = Flask(__name__)
 
@@ -54,6 +54,9 @@ def create_user():
 @app.route('/login', methods=["GET", "POST"])
 def login_user():
     """authenticate a user"""
+    if "username" in session:
+        return redirect(f"/users/{session['username']}")
+
     form = LoginUserForm()
 
     if form.validate_on_submit():
@@ -80,5 +83,67 @@ def user_detail(username):
         abort(401)
 
     user = User.query.get_or_404(username)
-    return render_template("user_info.html", user=user)
+    feedbacks = Feedback.query.filter_by(username=user.username).all()
+    return render_template("user_info.html", user=user, feedbacks=feedbacks)
 
+@app.route('/users/<username>/delete')
+def delete_user(username):
+    if username == session["username"]:
+        user = User.query.get_or_404(username)
+        db.session.delete(user)
+        db.session.commit()
+        flash(f'Deleted {username} successfully!')
+        return redirect('/logout')
+    else:
+        abort(401)
+
+@app.route('/users/<username>/feedback/add', methods=["GET", "POST"])
+def add_feedback(username):
+    """give feedback"""
+    if "username" not in session:
+        abort(401)
+
+    form = FeedbackForm()
+
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+        feedback = Feedback(title=title, content=content, username=username)
+        db.session.add(feedback)
+        db.session.commit()
+        return redirect(f'/users/{username}')
+    else:
+        return render_template("feedback.html", form=form)
+
+
+@app.route('/feedback/<id>/update', methods=["GET", "POST"])
+def edit_feedback(id):
+    """edit feedback"""
+    if "username" not in session:
+        abort(401)
+
+    feedback = Feedback.query.get_or_404(id)
+
+    form = FeedbackForm(obj=feedback)
+    if form.validate_on_submit():
+        feedback.title = form.title.data 
+        feedback.content = form.content.data
+        
+        db.session.add(feedback)
+        db.session.commit()
+        return redirect(f'/users/{feedback.username}')
+    else:
+        return render_template("feedback.html", form=form, feedback=feedback)
+
+@app.route('/feedback/<id>/delete', methods=["POST"])
+def delete_feedback(id):
+    """delete feedback"""
+    feedback = Feedback.query.get_or_404(id)
+
+    if feedback.username == session["username"]:
+        db.session.delete(feedback)
+        db.session.commit()
+        flash(f'Deleted feedback successfully!')
+        return redirect(f'/users/{feedback.username}')
+    else:
+        abort(401)

@@ -1,6 +1,6 @@
 from xml.dom import ValidationErr
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField
+from wtforms import StringField, PasswordField, TextAreaField
 from wtforms.validators import InputRequired, Email, email_validator, ValidationError
 
 from models import User
@@ -22,3 +22,8 @@ class LoginUserForm(FlaskForm):
     """Form for a user to log in"""
     username = StringField("Username", validators=[InputRequired()])
     password = PasswordField("Password", validators=[InputRequired()])
+
+class FeedbackForm(FlaskForm):
+    """Form to create feedback"""
+    title = StringField("Title", validators=[InputRequired()])
+    content = TextAreaField("Content", validators=[InputRequired()])

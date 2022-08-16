@@ -6,4 +6,15 @@
     <h1>{{user.username}}</h1>
     <p>{{user.full_name}}</p>
     <p>{{user.email}}</p>
+    <h2>Feedback:</h2>
+    {% for feedback in feedbacks %}
+<div class="m-4">
+    <h3>{{feedback.title}}</h3>
+    <p>{{feedback.content}}</p>
+    <a class="btn btn-secondary m-1" href="/feedback/{{feedback.id}}/update">edit</a>
+    <form method="post" action="/feedback/{{feedback.id}}/delete"><input type="submit" class="btn btn-danger m-1" value="delete"/></form>
+</div>
+      
+    {% endfor %}
+    <a class="btn btn-primary" href="/users/{{user.username}}/feedback/add">add feedback</a>
 {% endblock %}
